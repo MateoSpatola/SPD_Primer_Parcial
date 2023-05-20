@@ -32,16 +32,312 @@ Requisitos del Proyecto:
 
 
 ## Función principal
-.....
+El codigo hace uso de varias funciones para hacer funcionar el montacargas, el cual esta conformado por un display 7 segmentos (que indica el piso actual en el que se encuentra el montacargas), por 3 botones (uno para subir, otro para detener, y otro para bajar el montacargas) y por 2 leds que indican si el montacargas se encuentra detenido (led rojo) o en movimiento (led verde).
+Las funciones principales son las de subir(), detener() y bajar(), ya que estas son las que indican el procedimiento que debera hacer el montacargas dependiendo de cual sea requerida:
 
 ~~~ C (lenguaje en el que esta escrito)
-
+void subir()
+{
+  if(pisoActual != 9)
+  {
+    apagarLed(LED_ROJO);
+    prenderLed(LED_VERDE);
+    flagMensajeDetener = false;
+    flagMensajeBajar = false;
+    
+    estadoNumeroDisplay(pisoActual,1);
+    Serial.println("Subiendo...");
+    habilitarBotonesPorUnTiempo(3000);
+    pisoActual ++;
+    estadoNumeroDisplay(pisoActual,1);
+    Serial.print("Estas en el piso: ");
+    Serial.println(pisoActual);
+  }
+  else
+  {
+    if(flagMensajeSubir == false)
+    {
+      Serial.println("Montacargas detenido en ultimo piso.");
+      subiendo = false;
+      detenido = true;
+      flagMensajeSubir = true;
+    }
+  }
+}
 ~~~
 
 ~~~ C (lenguaje en el que esta escrito)
-
+void detener()
+{
+  prenderLed(LED_ROJO);
+  apagarLed(LED_VERDE);
+  if(flagMensajeDetener == false)
+  {
+    estadoNumeroDisplay(pisoActual,1);
+    Serial.print("Montacargas detenido. Estas en el piso: ");
+    Serial.println(pisoActual);
+    flagMensajeDetener = true;
+    if(pisoActual == 0)
+  	{
+      flagMensajeBajar = true;
+    }
+    if(pisoActual == 9)
+  	{
+      flagMensajeSubir = true;
+    }
+  }
+}
 ~~~
 
+~~~ C (lenguaje en el que esta escrito)
+void bajar()
+{
+  if(pisoActual != 0)
+  {
+    apagarLed(LED_ROJO);
+  	prenderLed(LED_VERDE);
+    flagMensajeSubir = false;
+  	flagMensajeDetener = false;
+    
+    estadoNumeroDisplay(pisoActual,1);
+    Serial.println("Bajando...");
+    habilitarBotonesPorUnTiempo(3000);
+    pisoActual --;
+    estadoNumeroDisplay(pisoActual,1);
+    Serial.print("Estas en el piso: ");
+    Serial.println(pisoActual);
+  }
+  else
+  {
+    if(flagMensajeBajar == false)
+    {
+      Serial.println("Montacargas detenido en planta baja.");
+      bajando = false;
+      detenido = true;
+      flagMensajeBajar = true;
+    }
+  }
+}
+~~~
+
+## Botones
+Otras funciones importantes son las de lectura de botones, ya que gracias a ellas el usuario puede decidir cual es el funcionamiento que quieren que realize el montacargas:
+~~~ C (lenguaje en el que esta escrito)
+void leerEstadoBotonSubir()
+{
+  estadoBotonSubir = digitalRead(BOTON_SUBIR);
+  if(estadoBotonSubir == 1)
+  {
+    if(subiendo == false)
+    {
+      Serial.println("Boton subir presionado");
+      subiendo = true;
+      detenido = false;
+      bajando = false;
+      if(pisoActual == 9)
+      {
+        Serial.println("Ya estas en el ultimo piso!");
+      }
+    }
+  }
+}
+~~~
+
+~~~ C (lenguaje en el que esta escrito)
+void leerEstadoBotonDetener()
+{
+  estadoBotonDetener = digitalRead(BOTON_DETENER);
+  if(estadoBotonDetener == 1)
+  {
+    if(detenido == false)
+    {
+      Serial.println("Boton detener presionado");
+      subiendo = false;
+      detenido = true;
+      bajando = false;
+      if(flagMensajeDetener == true)
+      {
+        Serial.println("Ya estas detenido");
+      }
+    }
+  }
+}
+~~~
+
+~~~ C (lenguaje en el que esta escrito)
+void leerEstadoBotonBajar()
+{
+  estadoBotonBajar = digitalRead(BOTON_BAJAR);
+  if(estadoBotonBajar == 1)
+  {
+    if(bajando == false)
+    {
+      Serial.println("Boton bajar presionado");
+      subiendo = false;
+      detenido = false;
+      bajando = true;
+      if(pisoActual == 0)
+      {
+        Serial.println("Ya estas en planta baja!");
+      }
+    }
+  }
+}
+~~~
+
+Gracias a la funcion habilitarBotonesPorUnTiempo(int tiempo) el usuario puede con solo presionar una vez (mientras el montacargas se encuentra en movimiento) elegir si quiere ir en otra direccion, o detenerlo cuando llegue al proximo piso sin necesidad de mantener apretado dicho boton:
+~~~ C (lenguaje en el que esta escrito)
+void habilitarBotonesPorUnTiempo(int tiempo)
+{
+  int acumuladorTiempo = 0;
+  while(acumuladorTiempo < tiempo)
+  {
+    delay(50);
+    leerEstadoBotones();
+    acumuladorTiempo += 50;
+  }
+}
+~~~
+
+## Display 7 segmentos 
+El manejo y funcionamiento del display 7 segmentos consta de dos funciones.
+
+Esta funcion permitira optimizar las lineas de codigo, controlando por parametros el estado de cada led del display, pudiendo ser HIGH o 1 para encender el led, o LOW o 0 para apagar el led:
+~~~ C (lenguaje en el que esta escrito)
+void estadoLedsDisplay(int A, int B, int C, int D, int E, int F, int G)
+{
+  digitalWrite(LED_A, A);
+  digitalWrite(LED_B, B);
+  digitalWrite(LED_C, C);
+  digitalWrite(LED_D, D);
+  digitalWrite(LED_E, E);
+  digitalWrite(LED_F, F);
+  digitalWrite(LED_G, G);
+}
+~~~
+
+Luego, haciendo uso de la funcion anterior, podemos encender o apagar el numero que querramos (entre el 0 y el 9), pasandolo por parametro:
+~~~ C (lenguaje en el que esta escrito)
+void estadoNumeroDisplay(int numero, int estado)
+{
+  switch(numero)
+  {
+    case 0:
+    	estadoLedsDisplay(estado,estado,estado,estado,estado,estado,0);
+    	break;
+    case 1:
+    	estadoLedsDisplay(0,estado,estado,0,0,0,0);
+    	break;
+    case 2:
+    	estadoLedsDisplay(estado,estado,0,estado,estado,0,estado);
+    	break;
+    case 3:
+    	estadoLedsDisplay(estado,estado,estado,estado,0,0,estado);
+    	break;
+    case 4:
+    	estadoLedsDisplay(0,estado,estado,0,0,estado,estado);
+    	break;
+    case 5:
+    	estadoLedsDisplay(estado,0,estado,estado,0,estado,estado);
+    	break;
+    case 6:
+    	estadoLedsDisplay(estado,0,estado,estado,estado,estado,estado);
+    	break;
+    case 7:
+    	estadoLedsDisplay(estado,estado,estado,0,0,0,0);
+    	break;
+    case 8:
+    	estadoLedsDisplay(estado,estado,estado,estado,estado,estado,estado);
+    	break;
+    case 9:
+    	estadoLedsDisplay(estado,estado,estado,estado,0,estado,estado);
+    	break;
+  }
+}
+~~~
+
+## Leds: verde y rojo
+Haciendo uso de las funciones prenderLed(int led) y apagarLed(int led) podemos prender o apagar el led que le pasamos por parametro e imprimirlo por serial:
+~~~ C (lenguaje en el que esta escrito)
+void prenderLed(int led)
+{
+  switch(led)
+  {
+    case LED_VERDE:
+    if(flagLedVerdeEncendido == false)
+    {
+      Serial.println("Led verde encendido");
+      flagLedVerdeEncendido = true;
+    }
+    break;
+    case LED_ROJO:
+    if(flagLedRojoEncendido == false)
+    {
+      Serial.println("Led rojo encendido");
+      flagLedRojoEncendido = true;
+    }
+    break;
+  }
+  digitalWrite(led, HIGH);
+}
+~~~
+
+~~~ C (lenguaje en el que esta escrito)
+void apagarLed(int led)
+{
+  switch(led)
+  {
+    case LED_VERDE:
+    if(flagLedVerdeEncendido == true)
+    {
+      Serial.println("Led verde apagado");
+      flagLedVerdeEncendido = false;
+    }
+    break;
+    case LED_ROJO:
+    if(flagLedRojoEncendido == true)
+    {
+      Serial.println("Led rojo apagado");
+      flagLedRojoEncendido = false;
+    }
+  }
+  digitalWrite(led, LOW);
+}
+~~~
+
+## Loop
+En el loop principal se hace uso de la funcion leerEstadoBotones(), para saber dependiendo de que boton fue pulsado, que hara el montacargas.
+Ni bien se inicie el programa, el montacargas se encontrara detenido en el piso 0 con el led rojo prendido.
+
+Si el boton pulsado fue "subir", se apagara el led rojo y se encendera el led verde, luego el montacargas comenzara a subir hasta llegar al ultimo piso, tardando 3 segundos por cada piso, indicando por el display en que piso se encuentra.
+Cuando llegue al ultimo piso, el montacargas se detendra.
+Si se pulsa el boton estando en el ultimo piso, se mantendra detenido y se indicara por serial que el montacargas ya se encuentra en el ultimo piso.
+
+Si el boton pulsado fue "detener", se encendera el led rojo y se apagara el led verde, luego se detendra cuando llegue al siguiente piso indicando por el display en que piso se encuentra.
+Si se pulsa el boton estando detenido, se mantendra detenido y se indicara por serial que el montacargas ya se encuentra detenido.
+
+Si el boton pulsado fue "bajar", se apagara el led rojo y se encendera el led verde, luego el montacargas comenzara a bajar hasta llegar a planta baja, tardando 3 segundos por cada piso, indicando por el display en que piso se encuentra.
+Cuando llegue a planta baja, el montacargas se detendra.
+Si se pulsa el boton estando en planta baja, se mantendra detenido y se indicara por serial que el montacargas ya se encuentra en planta baja.
+~~~ C (lenguaje en el que esta escrito)
+void loop()
+{
+  leerEstadoBotones();
+  
+  if(subiendo == true)
+  {
+    subir();
+  }
+  if(detenido == true)
+  {
+    detener();
+  }
+  if(bajando == true)
+  {
+    bajar();
+  }  
+}
+~~~
 
 ## :robot: Link al proyecto
 - [Proyecto](https://www.tinkercad.com/things/jZebBGVqYfF)
