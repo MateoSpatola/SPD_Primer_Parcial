@@ -121,7 +121,7 @@ void bajar()
 ~~~
 
 ## Botones
-Otras funciones importantes son las de lectura de botones, ya que gracias a ellas el usuario puede decidir cual es el funcionamiento que quieren que realize el montacargas:
+Otras funciones importantes son las de lectura de botones, ya que gracias a ellas el usuario puede decidir cual es el funcionamiento que quieren que realice el montacargas:
 ~~~ C (lenguaje en el que esta escrito)
 void leerEstadoBotonSubir()
 {
