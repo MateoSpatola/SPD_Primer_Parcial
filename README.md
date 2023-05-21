@@ -120,7 +120,7 @@ void bajar()
 }
 ~~~
 
-## Botones
+### Botones
 Otras funciones importantes son las de lectura de botones, ya que gracias a ellas el usuario puede decidir cual es el funcionamiento que quieren que realice el montacargas:
 ~~~ C (lenguaje en el que esta escrito)
 void leerEstadoBotonSubir()
@@ -199,7 +199,7 @@ void habilitarBotonesPorUnTiempo(int tiempo)
 }
 ~~~
 
-## Display 7 segmentos 
+### Display 7 segmentos 
 El manejo y funcionamiento del display 7 segmentos consta de dos funciones.
 
 Esta funcion permitira optimizar las lineas de codigo, controlando por parametros el estado de cada led del display, pudiendo ser HIGH o 1 para encender el led, o LOW o 0 para apagar el led:
@@ -256,7 +256,7 @@ void estadoNumeroDisplay(int numero, int estado)
 }
 ~~~
 
-## Leds: verde y rojo
+### Leds: verde y rojo
 Haciendo uso de las funciones prenderLed(int led) y apagarLed(int led) podemos prender o apagar el led que le pasamos por parametro e imprimirlo por serial:
 ~~~ C (lenguaje en el que esta escrito)
 void prenderLed(int led)
@@ -305,7 +305,7 @@ void apagarLed(int led)
 }
 ~~~
 
-## Loop
+### Loop
 En el loop principal se hace uso de la funcion leerEstadoBotones(), para saber dependiendo de que boton fue pulsado, que hara el montacargas.
 Ni bien se inicie el programa, el montacargas se encontrara detenido en el piso 0 con el led rojo prendido.
 
@@ -338,6 +338,36 @@ void loop()
   }  
 }
 ~~~
+
+
+## Diagrama esquemático del circuito
+![Tinkercad](./img/diagramaEsquematicoPlano1.png)
+![Tinkercad](./img/diagramaEsquematicoPlano2.png)
+
+### Funcionamiento aplicado de cada componente
+#### Pulsadores:
+Todos los pulsadores fueron conectados mediante una configuracion pull down (HIGH o 1 cuando es presionado, y LOW o 0 cuando no lo es).
+- S1: Terminales 1a y 1b conectados a una resistencia (R8) de 220ohms a GND del Arduino Uno (U1) y al pin D6 (entrada digital) del U1. Terminales 2a y 2b conectados a 5V del U1.
+- S2: Terminales 1a y 1b conectados a una resistencia (R9) de 220ohms a GND del Arduino Uno (U1) y al pin D5 (entrada digital) del U1. Terminales 2a y 2b conectados a 5V del U1.
+- S3: Terminales 1a y 1b conectados a una resistencia (R10) de 220ohms a GND del Arduino Uno (U1) y al pin D4 (entrada digital) del U1. Terminales 2a y 2b conectados a 5V del U1.
+
+#### Visualizador de 7 segmentos (DIGIT1):
+Tiene 7 leds integrados (A,B,C,D,E,F,G) los cuales se encienden cuando reciben un HIGH o 1 y se apagan cuando reciben un LOW o 0.
+En este proyecto son encendidos en conjunto para mostrar los numeros del 0 al 9.
+- a: "A" conectado a una resistencia (R2) de 220 ohms al pin D12 (salida digital) del U1.
+- b: "B" conectado a una resistencia (R1) de 220 ohms al pin D13 (salida digital) del U1.
+- c: "C" conectado a una resistencia (R7) de 220 ohms al pin D7 (salida digital) del U1.
+- d: "D" conectado a una resistencia (R6) de 220 ohms al pin D8 (salida digital) del U1.
+- e: "E" conectado a una resistencia (R5) de 220 ohms al pin D9 (salida digital) del U1.
+- f: "F" conectado a una resistencia (R3) de 220 ohms al pin D11 (salida digital) del U1.
+- g: "G" conectado a una resistencia (R4) de 220 ohms al pin D10 (salida digital) del U1.
+- K: "Comun" conectado a GND del U1.
+
+#### Leds:
+Los leds son encendidos cuando sus salidas digitales reciben un HIGH o 1 y se apagan cuando reciben un LOW o 0.
+- D1 GREEN: El catodo esta conectado a GND del U1. El anodo esta conectado a una resistencia (R11) de 220 ohms al pin D3 (salida digital) del U1.
+- D2 RED: El catodo esta conectado a GND del U1. El anodo esta conectado a una resistencia (R12) de 220 ohms al pin D2 (salida digital) del U1.
+
 
 ## :robot: Link al proyecto
 - [Proyecto](https://www.tinkercad.com/things/jZebBGVqYfF)
